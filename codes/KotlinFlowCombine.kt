@@ -1,22 +1,19 @@
 	val state = MutableStateFlow(HomeViewState())
     private val _state = MutableStateFlow(HomeViewState())
 
-    private val genreList = MutableStateFlow(listOf<Genre>())
+    private val genreList = MutableStateFlow(listOf<GenreData>())
     private val chartArtists = MutableStateFlow(listOf<ArtistData>())
     private val chartPodcasts = MutableStateFlow(listOf<PodcastData>())
     private val chartAlbums = MutableStateFlow(listOf<AlbumData>())
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun loadData() {
-       viewModelScope.launch {
-
            /**
             * Returns a Flow whose values are generated with transform function
             * by combining the most recently emitted values by each flow.
             * Reach to more information
 			* https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-		core/kotlinx.coroutines.flow/combine.html
             */
-
            combine(
                     genreList.flatMapLatest { genreRepository.fetchGenreList() },
                     chartPodcasts.flatMapLatest { mainRepository.fetchChartPodcasts() },
@@ -29,6 +26,5 @@
                     artists = artists,
                     albums = albums
                 )
-            }.collect { _state.value = it }
-        }
+            }.launchIn(viewModelScope)
     }
